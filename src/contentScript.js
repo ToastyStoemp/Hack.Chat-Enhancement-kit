@@ -4,4 +4,5 @@ function injectScript(file) {
     s.setAttribute('src', file);
     document.body.appendChild(s);
 }
+
 injectScript(chrome.extension.getURL('./src/main.user.js'));

@@ -1,0 +1,9 @@
+.me {
+  .text, .nick {
+    color: @base0D !important;
+  }
+}
+
+.nick {
+  color: @base09 !important;
+}
