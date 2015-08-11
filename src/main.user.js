@@ -181,8 +181,7 @@ pushMessage = function(args) {
   messageEl.appendChild(textEl)
 
   if (links.length > 0)
-    messageEl.appendChild(imigigy);
-
+    messageEl.appendChild(imigigy());
 
   // Scroll to bottom
   var atBottom = isAtBottom()
@@ -206,13 +205,13 @@ function parseLinks(g0) {
 };
 
 function imigigy() {
+  var p = document.createElement('p');
   if (links.length > 0) {
     var images = [];
     var videos = [];
     var YoutubeVids = [];
     var imageTypes = ["jpg", "gif", "png"];
     var videoTypes = ["ogg", "webm", "mp4"];
-    var p = document.createElement('p');
     for (var i = 0; i < links.length; i++) {
       if (imageTypes.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1 || videoTypes.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1 || typeof parse_yturl(links[i]) != 'undefined') {
         var el = document.createElement('p');
@@ -247,21 +246,19 @@ function imigigy() {
           images[i].style.display = "none";
       }
       for (var i = 0; i < videos.length; i++) {
-        if (videos[i].style.display == "none"){
+        if (videos[i].style.display == "none") {
           videos[i].style.display = "inline";
           videos[i].play();
-        }
-        else {
+        } else {
           videos[i].style.display = "none";
           videos[i].pause();
         }
       }
       for (var i = 0; i < YoutubeVids.length; i++) {
-        if (YoutubeVids[i].style.display == "none"){
+        if (YoutubeVids[i].style.display == "none") {
           YoutubeVids[i].style.display = "inline";
           //YoutubeVids[i].playVideo();
-        }
-        else {
+        } else {
           YoutubeVids[i].style.display = "none";
           //YoutubeVids[i].stopVideo();
         }
@@ -276,18 +273,20 @@ function imigigy() {
         window.scrollTo(0, document.body.scrollHeight)
       }
     }
-    return p;
   }
-  return;
+  return p;
 };
 
 function parse_yturl(url) {
   var video_id = url.split('v=')[1];
-  var ampersandPosition = video_id.indexOf('&');
-  if (ampersandPosition != -1) {
-    video_id = video_id.substring(0, ampersandPosition);
+  if (typeof video_id != 'undefined') {
+    var ampersandPosition = video_id.indexOf('&');
+    if (ampersandPosition != -1) {
+      video_id = video_id.substring(0, ampersandPosition);
+    }
+    return video_id;
   }
-  return video_id;
+  return
 }
 
 function createImageElement(link, images) {
