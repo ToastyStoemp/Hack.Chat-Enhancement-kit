@@ -1,6 +1,8 @@
 var messageSound = new Audio('https://www.freesound.org/people/bubaproducer/sounds/107156/download/107156__bubaproducer__button-9-funny.wav');
 var notifySound = new Audio('https://www.freesound.org/people/JustinBW/sounds/80921/download/80921__justinbw__buttonchime02up.wav');
 
+var links = [];
+
 var sidebar = document.getElementById("sidebar-content");
 
 var para = document.createElement("p");
@@ -42,54 +44,30 @@ para = document.createElement("p");
 btn = document.createElement("BUTTON");
 btn.appendChild(document.createTextNode("Call Mod"));
 btn.onclick = function() {
-  send({cmd: 'chat', nick: myNick, text: '.callMod ' + prompt("Enter name of suspect") + ' ' + prompt("Enter reason")});
+  send({
+    cmd: 'chat',
+    nick: myNick,
+    text: '.callMod ' + prompt("Enter name of suspect") + ' ' + prompt("Enter reason")
+  });
   btn.disabled = true;
-  setTimeout(function(){ btn.disabled = false; }, 30000);
+  setTimeout(function() {
+    btn.disabled = false;
+  }, 30000);
 };
 para.appendChild(btn);
 sidebar.appendChild(para);
 sidebar.insertBefore(para, sidebar.childNodes[7]);
 
-if (pushMessageOrig)
-  pushMessage = pushMessageOrig;
-
-var pushMessageOrig = pushMessage;
-var yourNick = myNick.split("#")[0];
-pushMessage = function(args) {
-  pushMessageOrig(args);
-  var msg = args.text;
-  if (msg.indexOf("invited you to ?") != -1) {
-    var nick = msg.substr(0, msg.indexOf(' '));
-    var channel = msg.substr(msg.indexOf('?') + 1, 8);
-    notifyMe(nick + " invited you", "Click here to accept.", false, channel);
-  }
-  if (args.nick != "*") {
-    if (msg.indexOf('.callMod') != -1) {
-      if (canCallMod) {
-        send({
-          cmd: 'chat',
-          nick: myNick,
-          text: '@' + args.nick + ' I have been alarmed'
-        });
-        var begin = msg.indexOf(' ') + 1;
-        var end = msg.indexOf(' ', begin);
-        var suspectlength = end - begin;
-        var suspect = msg.substr(begin, suspectlength);
-        _callMod(args.nick, suspect, msg.substr(end, msg.length - end));
-      }
-    }
-    if (msg.indexOf(yourNick) != -1 && !document.hasFocus()) {
-      if (NotCheckbox.checked)
-        notifyMe(args.nick + " mentioned you", args.text, false);
-    } else
-    if (SoundCheckbox.checked)
-      messageSound.play();
-  }
-  if (document.hasFocus()) {
-    window.unread = 0;
-    window.updateTitle();
-  }
-}
+///var yourNick = myNick.split("#")[0];
+//
+//
+//   } else
+//   if (SoundCheckbox.checked)
+//     messageSound.play();
+// }
+// if (document.hasFocus()) {
+//   window.unread = 0;
+//   window.updateTitle();
 
 var notifications = [];
 
@@ -100,21 +78,19 @@ window.onfocus = function() {
   notifications = [];
   window.unread = 0;
   window.updateTitle();
+  $('#chatinput').focus();
 }
 
-function notifyMe(title, text, sound, channel) {
-  if (!Notification) {
+function notifyMe(title, text, channel) {
+  if (!Notification)
     alert('Desktop notifications not available in your browser. Try Chrome.');
-    return;
-  }
-
-  if (Notification.permission !== "granted")
+  else if (Notification.permission !== "granted")
     Notification.requestPermission();
   else
-    _notifiyMe(title, text, sound, channel);
+    _notifiyMe(title, text, channel);
 }
 
-function _notifiyMe(title, text, sound, channel) {
+function _notifiyMe(title, text, channel) {
   if (SoundCheckbox.checked)
     notifySound.play();
   var Channel = channel;
@@ -123,10 +99,8 @@ function _notifiyMe(title, text, sound, channel) {
     icon: 'http://i.imgur.com/44B3G6a.png'
   });
 
-
   not.onclick = function() {
     if (Channel) {
-      console.log(Channel);
       window.open('https://hack.chat/?' + Channel, '_blank');
     } else
       window.focus()
@@ -137,6 +111,154 @@ function _notifiyMe(title, text, sound, channel) {
   }, 8000);
   notifications.push(not);
 }
+
+pushMessage = function(args) {
+  // Message container
+  var messageEl = document.createElement('div')
+  messageEl.classList.add('message')
+  if (args.admin) {
+    messageEl.classList.add('admin')
+  } else if (args.nick == myNick) {
+    messageEl.classList.add('me')
+  } else if (args.nick == '!') {
+    messageEl.classList.add('warn')
+  } else if (args.nick == '*') {
+    messageEl.classList.add('info')
+    if (args.text.indexOf("invited you to ?") != -1) {
+      var nick = args.text.substr(0, args.text.indexOf(' '));
+      var channel = args.text.substr(args.text.indexOf('?') + 1, 8);
+      notifyMe(nick + " invited you", "Click here to accept.", channel);
+    }
+  }
+  if (args.text.indexOf("@" + myNick.split("#")[0] + " ") != -1) {
+    messageEl.classList.add('mention');
+    if (NotCheckbox.checked && !document.hasFocus())
+      notifyMe(args.nick + " mentioned you", args.text, false);
+  }
+
+  // Nickname
+  var nickSpanEl = document.createElement('span')
+  nickSpanEl.classList.add('nick')
+  messageEl.appendChild(nickSpanEl)
+
+  if (args.trip) {
+    var tripEl = document.createElement('span')
+    tripEl.textContent = args.trip + " "
+    tripEl.classList.add('trip')
+    nickSpanEl.appendChild(tripEl)
+  }
+
+  if (args.nick) {
+    var nickLinkEl = document.createElement('a')
+    nickLinkEl.textContent = args.nick
+    nickLinkEl.onclick = function() {
+      insertAtCursor("@" + args.nick + " ")
+      $('#chatinput').focus()
+    }
+    var date = new Date(args.time || Date.now())
+    nickLinkEl.title = date.toLocaleString()
+    nickSpanEl.appendChild(nickLinkEl)
+  }
+
+  // Text
+  links = [];
+  var textEl = document.createElement('pre')
+  textEl.classList.add('text')
+
+  textEl.textContent = args.text || ''
+  textEl.innerHTML = textEl.innerHTML.replace(/(\?|https?:\/\/)\S+?(?=[,.!?:)]?\s|$)/g, parseLinks)
+
+  if ($('#parse-latex').checked) {
+    // Temporary hotfix for \rule spamming, see https://github.com/Khan/KaTeX/issues/109
+    textEl.innerHTML = textEl.innerHTML.replace(/\\rule|\\\\\s*\[.*?\]/g, '')
+    try {
+      renderMathInElement(textEl, {
+        delimiters: [{
+          left: "$$",
+          right: "$$",
+          display: true
+        }, {
+          left: "$",
+          right: "$",
+          display: false
+        }, ]
+      })
+    } catch (e) {
+      console.warn(e)
+    }
+  }
+
+  messageEl.appendChild(textEl)
+
+  var processedImages = imigigy();
+  if (processedImages)
+    messageEl.appendChild(processedImages);
+
+
+  // Scroll to bottom
+  var atBottom = isAtBottom()
+  $('#messages').appendChild(messageEl)
+  if (atBottom) {
+    window.scrollTo(0, document.body.scrollHeight)
+  }
+};
+
+function parseLinks(g0) {
+  var a = document.createElement('a')
+  a.innerHTML = g0
+  var url = a.textContent
+  if (url[0] == '?') {
+    url = "/" + url
+  }
+  a.href = url
+  a.target = '_blank'
+  links.push(g0);
+  return a.outerHTML;
+};
+
+function imigigy() {
+  if (links.length > 0) {
+    var images = [];
+    var types = ["jpg", "gif", "gifv", "png"];
+    var p = document.createElement('div');
+    var el = document.createElement('p');
+    el.innerHTML = ' [open here]';
+    el.style.border = 'none';
+    el.style.background = 'none';
+    el.onclick = function() {
+      showImages();
+    };
+    el.addEventListener("mouseover",function(){ el.style.cursor = "pointer"; });
+    p.appendChild(el);
+
+    for (var i = 0; i < links.length; i++) {
+      if (types.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1) {
+        var image = document.createElement('img')
+        image.setAttribute('src', links[i]);
+        image.style.display = "none";
+        image.style.maxWidth = "50%";
+        image.style.maxHeight = "50%";
+        images.push(image);
+        p.appendChild(image);
+      }
+    }
+
+    function showImages() {
+      for (var i = 0; i < images.length; i++) {
+        if (images[i].style.display == "none")
+          images[i].style.display = "inline";
+        else
+          images[i].style.display = "none";
+      }
+      var atBottom = isAtBottom()
+      if (atBottom) {
+        window.scrollTo(0, document.body.scrollHeight)
+      }
+    }
+    return p;
+  }
+  return;
+};
 
 
 // $\color{orange}{\large{Hack.Chat \space chrome \space extension}} \space \color{lightblue}{0.0.3}$

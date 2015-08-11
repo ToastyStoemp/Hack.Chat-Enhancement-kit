@@ -1,9 +1,4 @@
-.me {
-  .text, .nick {
-    color: @base0D !important;
-  }
-}
-
-.nick {
-  color: @base09 !important;
+.mention {
+    font-weight: bold;
+    color: rgb(214, 163, 86);
 }
