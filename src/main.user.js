@@ -1,7 +1,8 @@
-var messageSound = new Audio('https://www.freesound.org/people/bubaproducer/sounds/107156/download/107156__bubaproducer__button-9-funny.wav');
-var notifySound = new Audio('https://www.freesound.org/people/JustinBW/sounds/80921/download/80921__justinbw__buttonchime02up.wav');
+var messageSound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/messageSound.wav');
+var notifySound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/notificationSound.wav');
 
 var links = [];
+var imageData = Array();
 
 var sidebar = document.getElementById("sidebar-content");
 
@@ -57,17 +58,6 @@ btn.onclick = function() {
 para.appendChild(btn);
 sidebar.appendChild(para);
 sidebar.insertBefore(para, sidebar.childNodes[7]);
-
-///var yourNick = myNick.split("#")[0];
-//
-//
-//   } else
-//   if (SoundCheckbox.checked)
-//     messageSound.play();
-// }
-// if (document.hasFocus()) {
-//   window.unread = 0;
-//   window.updateTitle();
 
 var notifications = [];
 
@@ -190,9 +180,8 @@ pushMessage = function(args) {
 
   messageEl.appendChild(textEl)
 
-  var processedImages = imigigy();
-  if (processedImages)
-    messageEl.appendChild(processedImages);
+  if (links.length > 0)
+    messageEl.appendChild(imigigy);
 
 
   // Scroll to bottom
@@ -219,28 +208,35 @@ function parseLinks(g0) {
 function imigigy() {
   if (links.length > 0) {
     var images = [];
-    var types = ["jpg", "gif", "gifv", "png"];
-    var p = document.createElement('div');
-    var el = document.createElement('p');
-    el.innerHTML = ' [open here]';
-    el.style.border = 'none';
-    el.style.background = 'none';
-    el.onclick = function() {
-      showImages();
-    };
-    el.addEventListener("mouseover",function(){ el.style.cursor = "pointer"; });
-    p.appendChild(el);
+    var videos = [];
+    var YoutubeVids = [];
+    var imageTypes = ["jpg", "gif", "png"];
+    var videoTypes = ["ogg", "webm", "mp4"];
+    var p = document.createElement('p');
+    for (var i = 0; i < links.length; i++) {
+      if (imageTypes.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1 || videoTypes.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1 || typeof parse_yturl(links[i]) != 'undefined') {
+        var el = document.createElement('p');
+        el.innerHTML = '[+]';
+        el.style.border = 'none';
+        el.style.background = 'none';
+        el.onclick = function() {
+          showImages();
+        };
+        el.addEventListener("mouseover", function() {
+          el.style.cursor = "pointer";
+        });
+        p.appendChild(el);
+        break;
+      }
+    }
 
     for (var i = 0; i < links.length; i++) {
-      if (types.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1) {
-        var image = document.createElement('img')
-        image.setAttribute('src', links[i]);
-        image.style.display = "none";
-        image.style.maxWidth = "50%";
-        image.style.maxHeight = "50%";
-        images.push(image);
-        p.appendChild(image);
-      }
+      if (imageTypes.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1)
+        p.appendChild(createImageElement(links[i], images));
+      else if (videoTypes.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1)
+        p.appendChild(createvideoElement(links[i], videos));
+      else if (typeof parse_yturl(links[i]) != 'undefined')
+        p.appendChild(createYouTubeElement(parse_yturl(links[i]), YoutubeVids));
     }
 
     function showImages() {
@@ -250,6 +246,31 @@ function imigigy() {
         else
           images[i].style.display = "none";
       }
+      for (var i = 0; i < videos.length; i++) {
+        if (videos[i].style.display == "none"){
+          videos[i].style.display = "inline";
+          videos[i].play();
+        }
+        else {
+          videos[i].style.display = "none";
+          videos[i].pause();
+        }
+      }
+      for (var i = 0; i < YoutubeVids.length; i++) {
+        if (YoutubeVids[i].style.display == "none"){
+          YoutubeVids[i].style.display = "inline";
+          //YoutubeVids[i].playVideo();
+        }
+        else {
+          YoutubeVids[i].style.display = "none";
+          //YoutubeVids[i].stopVideo();
+        }
+      }
+      if (el.innerHTML == '[+]')
+        el.innerHTML = '[-]';
+      else
+        el.innerHTML = '[+]';
+
       var atBottom = isAtBottom()
       if (atBottom) {
         window.scrollTo(0, document.body.scrollHeight)
@@ -260,14 +281,190 @@ function imigigy() {
   return;
 };
 
+function parse_yturl(url) {
+  var video_id = url.split('v=')[1];
+  var ampersandPosition = video_id.indexOf('&');
+  if (ampersandPosition != -1) {
+    video_id = video_id.substring(0, ampersandPosition);
+  }
+  return video_id;
+}
 
-// $\color{orange}{\large{Hack.Chat \space chrome \space extension}} \space \color{lightblue}{0.0.3}$
+function createImageElement(link, images) {
+  var image = document.createElement('img')
+  image.setAttribute('src', link);
+  image.style.display = "none";
+  image.style.maxWidth = "50%";
+  image.style.maxHeight = "50%";
+  imageData[image] = {};
+  imageData[image].resized = false;
+  makeImageZoomable(image);
+  images.push(image);
+  return image;
+}
+
+function createvideoElement(link, videos) {
+  var video = document.createElement('video')
+  video.setAttribute('src', link);
+  video.style.display = "none";
+  video.style.width = "100%";
+  video.style.height = "100%";
+  video.play();
+  videos.push(video);
+  return video;
+}
+
+function createYouTubeElement(link, YoutubeVids) {
+  var iframe = document.createElement('iframe')
+  console.log(link)
+  iframe.setAttribute('src', "https://www.youtube.com/embed/" + link + "?version=3&enablejsapi=1");
+  iframe.setAttribute('width', "640");
+  iframe.setAttribute('height', "385");
+  iframe.setAttribute('frameborder', "0");
+  iframe.setAttribute('allowFullScreen', '');
+  iframe.style.display = "none";
+  YoutubeVids.push(iframe);
+  return iframe;
+}
+
+function getDragSize(e) {
+  return (p = Math.pow)(p(e.clientX - (rc = e.target.getBoundingClientRect()).left, 2) + p(e.clientY - rc.top, 2), .5);
+}
+
+function getHeight() {
+  return window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+}
+
+function makeImageZoomable(imgTag) {
+  dragTargetData = {};
+
+  imgTag.addEventListener('mousedown', function(e) {
+    if (e.ctrlKey != 0)
+      return true;
+    if (e.metaKey != null) // Can be on some platforms
+      if (e.metaKey != 0)
+        return true;
+    if (e.button == 0) {
+      if (imageData[e.target].position == null) {
+        imageData[e.target].zIndex = e.target.style.zIndex;
+        imageData[e.target].width = e.target.style.width;
+        imageData[e.target].height = e.target.style.height;
+        imageData[e.target].position = e.target.style.position;
+      }
+      dragTargetData.iw = e.target.width;
+      dragTargetData.d = getDragSize(e);
+      dragTargetData.dr = false;
+      e.preventDefault();
+    }
+  }, true);
+
+  imgTag.addEventListener('contextmenu', function(e) {
+    if (imageData[e.target].resized) {
+      imageData[e.target].resized = false;
+      e.target.style.zIndex = imageData[e.target].zIndex;
+      e.target.style.maxWidth = e.target.style.width = imageData[e.target].width;
+      e.target.style.maxHeight = e.target.style.height = imageData[e.target].height;
+      e.target.style.position = imageData[e.target].position;
+      e.preventDefault();
+      e.returnValue = false;
+      e.stopPropagation();
+      return false;
+    }
+  }, true);
+  imgTag.addEventListener('dblclick', function(e) {
+    if (e.ctrlKey != 0)
+      return true;
+    if (e.metaKey != null) // Can be on some platforms
+      if (e.metaKey != 0)
+        return true;
+
+    if (imageData[e.target].resized) {
+      e.target.style.maxWidth = e.target.style.width = imageData[e.target].width;
+    }
+    e.target.style.position = "fixed";
+    e.target.style.zIndex = 1000;
+    e.target.style.top = 0;
+    e.target.style.left = 0;
+    e.target.style.maxWidth = e.target.style.width = "auto";
+    e.target.style.maxHeight = e.target.style.height = getHeight() + "px";
+    imageData[e.target].resized = true;
+
+    e.preventDefault();
+    e.returnValue = false;
+    e.stopPropagation();
+    return false;
+  }, true);
+  imgTag.addEventListener('mousemove', function(e) {
+    if (dragTargetData.d) {
+      e.target.style.maxWidth = e.target.style.width = ((getDragSize(e)) * dragTargetData.iw / dragTargetData.d) + "px";
+      e.target.style.maxHeight = '';
+      e.target.style.height = 'auto';
+      e.target.style.zIndex = 1000; // Make sure the image is on top.
+
+      if (e.target.style.position == '') {
+        e.target.style.position = 'relative';
+      }
+      dragTargetData.dr = true;
+      imageData[e.target].resized = true;
+    }
+  }, false);
+
+  imgTag.addEventListener('mouseout', function(e) {
+    dragTargetData.d = false;
+    if (dragTargetData.dr) return false;
+  }, false);
+
+  imgTag.addEventListener('mouseup', function(e) {
+    dragTargetData.d = false;
+    if (dragTargetData.dr) return false;
+  }, true);
+
+  imgTag.addEventListener('click', function(e) {
+    if (e.ctrlKey != 0)
+      return true;
+    if (e.metaKey != null) // Can be on some platforms
+      if (e.metaKey != 0)
+        return true;
+    dragTargetData.d = false;
+    if (dragTargetData.dr) {
+      e.preventDefault();
+      return false;
+    }
+    if (imageData[e.target].resized) {
+      e.preventDefault();
+      e.returnValue = false;
+      e.stopPropagation();
+      return false;
+    }
+  }, false);
+}
+
+document.addEventListener('dragstart', function() {
+  return false
+}, false);
+
+// $\color{orange}{\large{Hack.Chat \space extension}} \space \color{lightblue}{0.0.5}$
 // $made \space by \space \color{cyan}{ToastyStoemp}$
+//
+// $\color{OrangeRed}{Chrome}$
 // download here: https://db.tt/8ErFlCcq
 // just drag and drop in: chrome://extensions/
+// GitHub: http://bit.ly/1ISXn6b
+// Instructions: http://i.imgur.com/814NJYR.gifv
 //
-// A quick reminder that there is a chrome extension for hack.chat;
-// This extension adds notification upon your name being mentioned (@nick),
-// and adds the user ignore GUI button in the sidebar :)
+// $\color{OrangeRed}{FireFox}$
+// download here: https://db.tt/oqqg0oTg
+// GitHub: Coming soon.
+// A big Thanks to $\color{SpringGreen}{raf924}$ for help on the firefox version!
 //
-// More to come!
+// Fixed:
+//   - Sounds are now loaded properly
+//
+// Added:
+//   - Highlight of text with your username
+//   - In chat image load + resize supports jpg, gif, png
+//   - In chat video supports mp4, ogg, webm
+//   - list ignored users
+//   - remove ignored users
+//
+// More features to come!

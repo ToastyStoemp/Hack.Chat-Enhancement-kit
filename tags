@@ -12,7 +12,7 @@ btn.onclick	.\src\main.user.js	/^btn.onclick = function() {$/;"	f
 content_scripts	.\manifest.json	/^  "content_scripts": [{$/;"	f
 css	.\manifest.json	/^    "css": [".\/style\/custom.css"]$/;"	f
 description	.\manifest.json	/^  "description": "Adds various functions to Hack.Chat - made by ToastyStoemp",$/;"	f
-el.onclick	.\src\main.user.js	/^    el.onclick = function() {$/;"	f
+el.onclick	.\src\main.user.js	/^        el.onclick = function() {$/;"	f
 function.showImages	.\src\main.user.js	/^    function showImages() {$/;"	f
 homepage_url	.\manifest.json	/^  "homepage_url": "https:\/\/github.com\/ToastyStoemp",$/;"	f
 icons	.\manifest.json	/^  "icons": {$/;"	f
@@ -24,7 +24,14 @@ matches	.\manifest.json	/^    "matches": ["https:\/\/hack.chat\/?*"],$/;"	f
 name	.\manifest.json	/^  "name": "Hack.Chat Enhancement kit",$/;"	f
 not.onclick	.\src\main.user.js	/^  not.onclick = function() {$/;"	f
 notifyMe	.\src\main.user.js	/^function notifyMe(title, text, channel) {$/;"	f
+parseLinks.createImageElement	.\src\main.user.js	/^function createImageElement(link, images) {$/;"	f
+parseLinks.createYouTubeElement	.\src\main.user.js	/^function createYouTubeElement(link, YoutubeVids) {$/;"	f
+parseLinks.createvideoElement	.\src\main.user.js	/^function createvideoElement(link, videos) {$/;"	f
+parseLinks.getDragSize	.\src\main.user.js	/^function getDragSize(e) {$/;"	f
+parseLinks.getHeight	.\src\main.user.js	/^function getHeight() {$/;"	f
 parseLinks.imigigy	.\src\main.user.js	/^function imigigy() {$/;"	f
+parseLinks.makeImageZoomable	.\src\main.user.js	/^function makeImageZoomable(imgTag) {$/;"	f
+parseLinks.parse_yturl	.\src\main.user.js	/^function parse_yturl(url) {$/;"	f
 permissions	.\manifest.json	/^  "permissions": [$/;"	f
 pushMessage	.\src\main.user.js	/^pushMessage = function(args) {$/;"	f
 version	.\manifest.json	/^  "version": "0.0.5",$/;"	f

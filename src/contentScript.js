@@ -15,5 +15,3 @@ function injectStyle(file) {
 
 injectScript(chrome.extension.getURL('src/main.user.js'));
 injectStyle(chrome.extension.getURL('style/custom.css'));
-
-//link#scheme-link(rel="stylesheet", href="/schemes/atelier-dune.css")
