@@ -34,6 +34,6 @@ parseLinks.makeImageZoomable	.\src\main.user.js	/^function makeImageZoomable(img
 parseLinks.parse_yturl	.\src\main.user.js	/^function parse_yturl(url) {$/;"	f
 permissions	.\manifest.json	/^  "permissions": [$/;"	f
 pushMessage	.\src\main.user.js	/^pushMessage = function(args) {$/;"	f
-version	.\manifest.json	/^  "version": "0.0.5",$/;"	f
+version	.\manifest.json	/^  "version": "0.0.6",$/;"	f
 web_accessible_resources	.\manifest.json	/^  "web_accessible_resources": ["\/src\/main.user.js", "\/style\/custom.css"],$/;"	f
 window.onfocus	.\src\main.user.js	/^window.onfocus = function() {$/;"	f

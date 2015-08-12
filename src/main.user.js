@@ -66,8 +66,8 @@ window.onfocus = function() {
     notifications[i].close();
   }
   notifications = [];
-  window.unread = 0;
-  window.updateTitle();
+  unread = 0;
+  updateTitle();
   $('#chatinput').focus();
 }
 
@@ -178,6 +178,8 @@ pushMessage = function(args) {
     }
   }
 
+  //parseCode(textEl);
+
   messageEl.appendChild(textEl)
 
   if (links.length > 0)
@@ -188,6 +190,45 @@ pushMessage = function(args) {
   $('#messages').appendChild(messageEl)
   if (atBottom) {
     window.scrollTo(0, document.body.scrollHeight)
+  }
+
+  if (!document.hasFocus() && args.nick != '*')
+    unread += 1
+	updateTitle()
+};
+
+function parseCode(message)
+{
+  var div;
+
+  var startSearchIndex = 0;
+  while (message.indexOf('```', startSearchIndex) != -1){
+  var beginIndex = message.indexOf('```');
+  var endIndex = message.indexOf('```', beginIndex);
+  var length = endIndex - beginIndex;
+  if (beginIndex - startSearchIndex != 0) {
+    var prevText = message.substr(startSearchIndex, beginIndex - startSearchIndex);
+    var textNode = document.createTextNode(prevText);
+    div.appendChild(textNode);
+  }
+  var script = document.createElement('script');
+  script.classList.add('script');
+  script.innerHTML = message.substrTT;
+
+}
+
+  var parsedMsg = message;
+  while (parsedMsg.indexOf('```') != -1){
+    var content
+  }
+
+
+  var code = message.match(/(```(.|\s)*```)/g);
+  if (typeof code != 'undefined') {
+    var script = document.createElement('script');
+    script.classList.add('script');
+    script.innerHTML = code;
+
   }
 };
 
@@ -309,6 +350,7 @@ function createvideoElement(link, videos) {
   video.style.width = "100%";
   video.style.height = "100%";
   video.play();
+  video.loop = true;
   videos.push(video);
   return video;
 }
@@ -370,29 +412,6 @@ function makeImageZoomable(imgTag) {
       return false;
     }
   }, true);
-  imgTag.addEventListener('dblclick', function(e) {
-    if (e.ctrlKey != 0)
-      return true;
-    if (e.metaKey != null) // Can be on some platforms
-      if (e.metaKey != 0)
-        return true;
-
-    if (imageData[e.target].resized) {
-      e.target.style.maxWidth = e.target.style.width = imageData[e.target].width;
-    }
-    e.target.style.position = "fixed";
-    e.target.style.zIndex = 1000;
-    e.target.style.top = 0;
-    e.target.style.left = 0;
-    e.target.style.maxWidth = e.target.style.width = "auto";
-    e.target.style.maxHeight = e.target.style.height = getHeight() + "px";
-    imageData[e.target].resized = true;
-
-    e.preventDefault();
-    e.returnValue = false;
-    e.stopPropagation();
-    return false;
-  }, true);
   imgTag.addEventListener('mousemove', function(e) {
     if (dragTargetData.d) {
       e.target.style.maxWidth = e.target.style.width = ((getDragSize(e)) * dragTargetData.iw / dragTargetData.d) + "px";
@@ -441,29 +460,3 @@ function makeImageZoomable(imgTag) {
 document.addEventListener('dragstart', function() {
   return false
 }, false);
-
-// $\color{orange}{\large{Hack.Chat \space extension}} \space \color{lightblue}{0.0.5}$
-// $made \space by \space \color{cyan}{ToastyStoemp}$
-//
-// $\color{OrangeRed}{Chrome}$
-// download here: https://db.tt/8ErFlCcq
-// just drag and drop in: chrome://extensions/
-// GitHub: http://bit.ly/1ISXn6b
-// Instructions: http://i.imgur.com/814NJYR.gifv
-//
-// $\color{OrangeRed}{FireFox}$
-// download here: https://db.tt/oqqg0oTg
-// GitHub: Coming soon.
-// A big Thanks to $\color{SpringGreen}{raf924}$ for help on the firefox version!
-//
-// Fixed:
-//   - Sounds are now loaded properly
-//
-// Added:
-//   - Highlight of text with your username
-//   - In chat image load + resize supports jpg, gif, png
-//   - In chat video supports mp4, ogg, webm
-//   - list ignored users
-//   - remove ignored users
-//
-// More features to come!
