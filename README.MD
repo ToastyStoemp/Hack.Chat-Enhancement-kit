@@ -1,4 +1,4 @@
-$\color{orange}{\large{Hack.Chat \space extension}} \space \color{lightblue}{0.0.7}$
+$\color{orange}{\large{Hack.Chat \space extension}} \space \color{lightblue}{0.0.8}$
 $made \space by \space \color{cyan}{ToastyStoemp}$
 
 $\color{OrangeRed}{Chrome \space FireFox \space Opera}$
@@ -43,3 +43,15 @@ Fixed:
 - Merged Admin with normal user, auto detection
 - Updated Firefox with previous updates
 - Merged FireFox With Chrome version, to have better work flow
+
+#v0.0.8
+Fixed:
+- Detection of admins
+- Unidentified notification
+
+Added:
+- in chat code snippets use as next:
+  ```
+  code
+  ```
+- Local storage is now used to save your options

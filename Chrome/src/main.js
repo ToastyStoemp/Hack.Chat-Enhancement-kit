@@ -21,6 +21,15 @@ function checkAdmin() {
       isAdmin = true;
   }
 }
+var notifyMe_S = (localStorageGet('notifyMe_S') == "true");
+var sound_S = (localStorageGet('sound_S') == "true");
+var alarmMe_S = (localStorageGet('alarmMe_S') == "true");
+
+window.onbeforeunload = function(){
+  var notifyMe_S = localStorageSet('notifyMe_S', NotCheckbox.checked);
+  var sound_S = localStorageSet('sound_S', SoundCheckbox.checked);
+  var alarmMe_S = localStorageSet('alarmMe_S', AlarmCheckbox.checked);
+}
 
 var sidebar = document.getElementById("sidebar-content");
 var contentCounter = 4;
@@ -28,32 +37,29 @@ var contentCounter = 4;
 var para = document.createElement("p");
 var NotCheckbox = document.createElement("INPUT");
 NotCheckbox.type = "checkbox";
-NotCheckbox.checked = true;
+NotCheckbox.checked = notifyMe_S;
 var text = document.createTextNode("Notify me");
 para.appendChild(NotCheckbox);
 para.appendChild(text);
-sidebar.appendChild(para);
 sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 
 para = document.createElement("p");
 var SoundCheckbox = document.createElement("INPUT");
 SoundCheckbox.type = "checkbox";
-SoundCheckbox.checked = true;
+SoundCheckbox.checked = sound_S;
 text = document.createTextNode("Sound");
 para.appendChild(SoundCheckbox);
 para.appendChild(text);
-sidebar.appendChild(para);
 sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 
 if (isAdmin) {
   para = document.createElement("p");
   var AlarmCheckbox = document.createElement("INPUT");
   AlarmCheckbox.type = "checkbox";
-  AlarmCheckbox.checked = true;
+  AlarmCheckbox.checked = alarmMe_S;
   text = document.createTextNode("Alarm me");
   para.appendChild(AlarmCheckbox);
   para.appendChild(text);
-  sidebar.appendChild(para);
   sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 }
 
@@ -69,7 +75,6 @@ btn.onclick = function() {
   });
 };
 para.appendChild(btn);
-sidebar.appendChild(para);
 sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 
 if (isAdmin) {
@@ -83,7 +88,6 @@ if (isAdmin) {
     })
   };
   para.appendChild(btn);
-  sidebar.appendChild(para);
   sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 } else {
   para = document.createElement("p");
