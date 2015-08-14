@@ -1,6 +1,6 @@
 {
   "name": "Hack.Chat Enhancement kit",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "manifest_version": 2,
   "description": "Adds various functions to Hack.Chat - made by ToastyStoemp",
   "homepage_url": "https://github.com/ToastyStoemp",
@@ -9,7 +9,7 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "web_accessible_resources": ["/src/main.user.js", "/style/custom.css"],
+  "web_accessible_resources": ["/src/main.js", "/style/custom.css"],
   "manifest_version": 2,
   "content_scripts": [{
     "js": ["/src/contentScript.js"],

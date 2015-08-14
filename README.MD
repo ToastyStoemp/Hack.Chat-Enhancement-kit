@@ -1,14 +1,13 @@
 $\color{orange}{\large{Hack.Chat \space extension}} \space \color{lightblue}{0.0.5}$
 $made \space by \space \color{cyan}{ToastyStoemp}$
 
-$\color{OrangeRed}{Chrome}$
-download here: https://db.tt/8ErFlCcq
-just drag and drop in: chrome://extensions/
-GitHub: http://bit.ly/1ISXn6b
-Instructions: http://i.imgur.com/814NJYR.gifv
-
-$\color{OrangeRed}{FireFox}$
-Coming Soon!
+$\color{OrangeRed}{Chrome \FireFox \Opera}$
+download here: https://github.com/ToastyStoemp/Hack.Chat-Enhancement-kit/releases
+just drag and drop in: chrome://extensions/ or anywhere in firefox
+GitHub: https://github.com/ToastyStoemp/Hack.Chat-Enhancement-kit
+Instructions: http://bit.ly/1HH6eqy
+download here: https://github.com/ToastyStoemp/Hack.Chat-Enhancement-kit/releases
+A big Thanks to $\color{SpringGreen}{raf924}$ for help on the firefox version!
 
 #v0.0.4
 Fixed:
@@ -35,7 +34,13 @@ Added:
 Fixed:
 - Title bar showing correct count of new messages
 - Double clicking images moved them to the left top corner
-- webm now loop;
+- webm now loop
 
 Added:
 - Title bar unread count does not count leave or join
+
+#v0.0.7
+Fixed:
+- Merged Admin with normal user, auto detection
+- Updated Firefox with previous updates
+- Merged FireFox With Chrome version, to have better work flow

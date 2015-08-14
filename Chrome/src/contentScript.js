@@ -13,5 +13,5 @@ function injectStyle(file) {
     document.head.appendChild(s);
 }
 
-injectScript(chrome.extension.getURL('src/main.user.js'));
+injectScript(chrome.extension.getURL('src/main.js'));
 injectStyle(chrome.extension.getURL('style/custom.css'));

@@ -1,10 +1,29 @@
+var isAdmin = false;
+var knownAdmins = ["ToastyStoemp", "M4GNV5", "Shrooms", "vortico", "bacon"];
+
 var messageSound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/messageSound.wav');
 var notifySound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/notificationSound.wav');
+var modSound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/modSound.wav');
+var canCallMod = true;
 
 var links = [];
 var imageData = Array();
 
+checkAdmin();
+
+function checkAdmin() {
+  if (typeof MyNick != 'undefined') {
+    var trip = myNick.split("#")[0];
+    for (var i = 0; i < knownAdmins.length; i++)
+      if (knownAdmins[i] == trip)
+        isAdmin = true;
+    if (myNick == "vortico")
+      isAdmin = true;
+  }
+}
+
 var sidebar = document.getElementById("sidebar-content");
+var contentCounter = 4;
 
 var para = document.createElement("p");
 var NotCheckbox = document.createElement("INPUT");
@@ -14,7 +33,7 @@ var text = document.createTextNode("Notify me");
 para.appendChild(NotCheckbox);
 para.appendChild(text);
 sidebar.appendChild(para);
-sidebar.insertBefore(para, sidebar.childNodes[4]);
+sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 
 para = document.createElement("p");
 var SoundCheckbox = document.createElement("INPUT");
@@ -24,7 +43,19 @@ text = document.createTextNode("Sound");
 para.appendChild(SoundCheckbox);
 para.appendChild(text);
 sidebar.appendChild(para);
-sidebar.insertBefore(para, sidebar.childNodes[5]);
+sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
+
+if (isAdmin) {
+  para = document.createElement("p");
+  var AlarmCheckbox = document.createElement("INPUT");
+  AlarmCheckbox.type = "checkbox";
+  AlarmCheckbox.checked = true;
+  text = document.createTextNode("Alarm me");
+  para.appendChild(AlarmCheckbox);
+  para.appendChild(text);
+  sidebar.appendChild(para);
+  sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
+}
 
 para = document.createElement("p");
 var btn = document.createElement("BUTTON");
@@ -39,25 +70,40 @@ btn.onclick = function() {
 };
 para.appendChild(btn);
 sidebar.appendChild(para);
-sidebar.insertBefore(para, sidebar.childNodes[6]);
+sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 
-para = document.createElement("p");
-btn = document.createElement("BUTTON");
-btn.appendChild(document.createTextNode("Call Mod"));
-btn.onclick = function() {
-  send({
-    cmd: 'chat',
-    nick: myNick,
-    text: '.callMod ' + prompt("Enter name of suspect") + ' ' + prompt("Enter reason")
-  });
-  btn.disabled = true;
-  setTimeout(function() {
-    btn.disabled = false;
-  }, 30000);
-};
-para.appendChild(btn);
-sidebar.appendChild(para);
-sidebar.insertBefore(para, sidebar.childNodes[7]);
+if (isAdmin) {
+  para = document.createElement("p");
+  btn = document.createElement("BUTTON");
+  btn.appendChild(document.createTextNode("Ban User"));
+  btn.onclick = function() {
+    send({
+      cmd: 'ban',
+      nick: prompt("Enter nick:")
+    })
+  };
+  para.appendChild(btn);
+  sidebar.appendChild(para);
+  sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
+} else {
+  para = document.createElement("p");
+  btn = document.createElement("BUTTON");
+  btn.appendChild(document.createTextNode("Call Mod"));
+  btn.onclick = function() {
+    send({
+      cmd: 'chat',
+      nick: myNick,
+      text: '.callMod ' + prompt("Enter name of suspect") + ' ' + prompt("Enter reason")
+    });
+    btn.disabled = true;
+    setTimeout(function() {
+      btn.disabled = false;
+    }, 30000);
+  };
+  para.appendChild(btn);
+  sidebar.appendChild(para);
+  sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
+}
 
 var notifications = [];
 
@@ -102,123 +148,142 @@ function _notifiyMe(title, text, channel) {
   notifications.push(not);
 }
 
-pushMessage = function(args) {
-  // Message container
-  var messageEl = document.createElement('div')
-  messageEl.classList.add('message')
-  if (args.admin) {
-    messageEl.classList.add('admin')
-  } else if (args.nick == myNick) {
-    messageEl.classList.add('me')
-  } else if (args.nick == '!') {
-    messageEl.classList.add('warn')
-  } else if (args.nick == '*') {
-    messageEl.classList.add('info')
-    if (args.text.indexOf("invited you to ?") != -1) {
-      var nick = args.text.substr(0, args.text.indexOf(' '));
-      var channel = args.text.substr(args.text.indexOf('?') + 1, 8);
-      notifyMe(nick + " invited you", "Click here to accept.", channel);
+var timer = window.setInterval(checkNick, 500);
+
+function checkNick() {
+  if (myNick) {
+    window.clearInterval(timer);
+    notifyMe();
+    pushMessage = function(args) {
+      // Message container
+      var messageEl = document.createElement('div')
+      messageEl.classList.add('message')
+      if (args.admin) {
+        messageEl.classList.add('admin')
+      } else if (args.nick == myNick) {
+        messageEl.classList.add('me')
+      } else if (args.nick == '!') {
+        messageEl.classList.add('warn')
+      } else if (args.nick == '*') {
+        messageEl.classList.add('info')
+        if (args.text.indexOf("invited you to ?") != -1) {
+          var nick = args.text.substr(0, args.text.indexOf(' '));
+          var channel = args.text.substr(args.text.indexOf('?') + 1, 8);
+          notifyMe(nick + " invited you", "Click here to accept.", channel);
+        }
+      }
+      if (args.text.indexOf("@" + myNick.split("#")[0] + " ") != -1) {
+        messageEl.classList.add('mention');
+        if (NotCheckbox.checked && !document.hasFocus())
+          notifyMe(args.nick + " mentioned you", args.text, false);
+      }
+      if (isAdmin) {
+        if (args.text.indexOf('.callMod') != -1) {
+          if (canCallMod) {
+            send({
+              cmd: 'chat',
+              nick: myNick,
+              text: '@' + args.nick + ' I have been alarmed'
+            });
+            _callMod(args)
+          }
+        }
+      }
+
+      // Nickname
+      var nickSpanEl = document.createElement('span')
+      nickSpanEl.classList.add('nick')
+      messageEl.appendChild(nickSpanEl)
+
+      if (args.trip) {
+        var tripEl = document.createElement('span')
+        tripEl.textContent = args.trip + " "
+        tripEl.classList.add('trip')
+        nickSpanEl.appendChild(tripEl)
+      }
+
+      if (args.nick) {
+        var nickLinkEl = document.createElement('a')
+        nickLinkEl.textContent = args.nick
+        nickLinkEl.onclick = function() {
+          insertAtCursor("@" + args.nick + " ")
+          $('#chatinput').focus()
+        }
+        var date = new Date(args.time || Date.now())
+        nickLinkEl.title = date.toLocaleString()
+        nickSpanEl.appendChild(nickLinkEl)
+      }
+
+      // Text
+      links = [];
+      var textEl = document.createElement('pre')
+      textEl.classList.add('text')
+
+      textEl.textContent = args.text || ''
+      textEl.innerHTML = textEl.innerHTML.replace(/(\?|https?:\/\/)\S+?(?=[,.!?:)]?\s|$)/g, parseLinks)
+
+      if ($('#parse-latex').checked) {
+        // Temporary hotfix for \rule spamming, see https://github.com/Khan/KaTeX/issues/109
+        textEl.innerHTML = textEl.innerHTML.replace(/\\rule|\\\\\s*\[.*?\]/g, '')
+        try {
+          renderMathInElement(textEl, {
+            delimiters: [{
+              left: "$$",
+              right: "$$",
+              display: true
+            }, {
+              left: "$",
+              right: "$",
+              display: false
+            }, ]
+          })
+        } catch (e) {
+          console.warn(e)
+        }
+      }
+
+      //parseCode(textEl);
+
+      messageEl.appendChild(textEl)
+
+      if (links.length > 0)
+        messageEl.appendChild(imigigy());
+
+      // Scroll to bottom
+      var atBottom = isAtBottom()
+      $('#messages').appendChild(messageEl)
+      if (atBottom) {
+        window.scrollTo(0, document.body.scrollHeight)
+      }
+
+      if (!document.hasFocus() && args.nick != '*')
+        unread += 1
+      updateTitle()
     }
   }
-  if (args.text.indexOf("@" + myNick.split("#")[0] + " ") != -1) {
-    messageEl.classList.add('mention');
-    if (NotCheckbox.checked && !document.hasFocus())
-      notifyMe(args.nick + " mentioned you", args.text, false);
-  }
-
-  // Nickname
-  var nickSpanEl = document.createElement('span')
-  nickSpanEl.classList.add('nick')
-  messageEl.appendChild(nickSpanEl)
-
-  if (args.trip) {
-    var tripEl = document.createElement('span')
-    tripEl.textContent = args.trip + " "
-    tripEl.classList.add('trip')
-    nickSpanEl.appendChild(tripEl)
-  }
-
-  if (args.nick) {
-    var nickLinkEl = document.createElement('a')
-    nickLinkEl.textContent = args.nick
-    nickLinkEl.onclick = function() {
-      insertAtCursor("@" + args.nick + " ")
-      $('#chatinput').focus()
-    }
-    var date = new Date(args.time || Date.now())
-    nickLinkEl.title = date.toLocaleString()
-    nickSpanEl.appendChild(nickLinkEl)
-  }
-
-  // Text
-  links = [];
-  var textEl = document.createElement('pre')
-  textEl.classList.add('text')
-
-  textEl.textContent = args.text || ''
-  textEl.innerHTML = textEl.innerHTML.replace(/(\?|https?:\/\/)\S+?(?=[,.!?:)]?\s|$)/g, parseLinks)
-
-  if ($('#parse-latex').checked) {
-    // Temporary hotfix for \rule spamming, see https://github.com/Khan/KaTeX/issues/109
-    textEl.innerHTML = textEl.innerHTML.replace(/\\rule|\\\\\s*\[.*?\]/g, '')
-    try {
-      renderMathInElement(textEl, {
-        delimiters: [{
-          left: "$$",
-          right: "$$",
-          display: true
-        }, {
-          left: "$",
-          right: "$",
-          display: false
-        }, ]
-      })
-    } catch (e) {
-      console.warn(e)
-    }
-  }
-
-  //parseCode(textEl);
-
-  messageEl.appendChild(textEl)
-
-  if (links.length > 0)
-    messageEl.appendChild(imigigy());
-
-  // Scroll to bottom
-  var atBottom = isAtBottom()
-  $('#messages').appendChild(messageEl)
-  if (atBottom) {
-    window.scrollTo(0, document.body.scrollHeight)
-  }
-
-  if (!document.hasFocus() && args.nick != '*')
-    unread += 1
-	updateTitle()
 };
 
-function parseCode(message)
-{
+function parseCode(message) {
   var div;
 
   var startSearchIndex = 0;
-  while (message.indexOf('```', startSearchIndex) != -1){
-  var beginIndex = message.indexOf('```');
-  var endIndex = message.indexOf('```', beginIndex);
-  var length = endIndex - beginIndex;
-  if (beginIndex - startSearchIndex != 0) {
-    var prevText = message.substr(startSearchIndex, beginIndex - startSearchIndex);
-    var textNode = document.createTextNode(prevText);
-    div.appendChild(textNode);
-  }
-  var script = document.createElement('script');
-  script.classList.add('script');
-  script.innerHTML = message.substrTT;
+  while (message.indexOf('```', startSearchIndex) != -1) {
+    var beginIndex = message.indexOf('```');
+    var endIndex = message.indexOf('```', beginIndex);
+    var length = endIndex - beginIndex;
+    if (beginIndex - startSearchIndex != 0) {
+      var prevText = message.substr(startSearchIndex, beginIndex - startSearchIndex);
+      var textNode = document.createTextNode(prevText);
+      div.appendChild(textNode);
+    }
+    var script = document.createElement('script');
+    script.classList.add('script');
+    script.innerHTML = message.substrTT;
 
-}
+  }
 
   var parsedMsg = message;
-  while (parsedMsg.indexOf('```') != -1){
+  while (parsedMsg.indexOf('```') != -1) {
     var content
   }
 
@@ -366,6 +431,35 @@ function createYouTubeElement(link, YoutubeVids) {
   iframe.style.display = "none";
   YoutubeVids.push(iframe);
   return iframe;
+}
+
+function _callMod(args) {
+  var begin = args.text.indexOf(' ') + 1;
+  var end = args.text.indexOf(' ', begin);
+  var suspectlength = end - begin;
+  var suspect = args.text.substr(begin, suspectlength);
+  var sender = args.nick;
+  var reason = args.text.substr(end, args.text.length - end);
+  console.log(JSON.stringify(args));
+  if (canCallMod && AlarmCheckbox.checked) {
+    canCallMod = false;
+    modSound.play();
+    var not = new Notification(sender + ' requested a moderator', {
+      body: suspect + " is under suspicion of " + reason,
+      icon: 'http://i.imgur.com/44B3G6a.png'
+    });
+    not.onclick = function() {
+      window.focus()
+    };
+    setTimeout(function() {
+      canCallMod = true;
+    }, 30000);
+    setTimeout(function() {
+      not.close();
+      notifications.splice(notifications.indexOf(not), 1);
+    }, 8000);
+    notifications.push(not);
+  }
 }
 
 function getDragSize(e) {
