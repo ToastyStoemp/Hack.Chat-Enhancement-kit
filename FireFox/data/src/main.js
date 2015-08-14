@@ -127,25 +127,27 @@ function notifyMe(title, text, channel) {
 }
 
 function _notifiyMe(title, text, channel) {
-  if (SoundCheckbox.checked)
-    notifySound.play();
-  var Channel = channel;
-  var not = new Notification(title, {
-    body: text,
-    icon: 'http://i.imgur.com/44B3G6a.png'
-  });
+  if (typeof text != 'undefined') {
+    if (SoundCheckbox.checked)
+      notifySound.play();
+    var Channel = channel;
+    var not = new Notification(title, {
+      body: text,
+      icon: 'http://i.imgur.com/44B3G6a.png'
+    });
 
-  not.onclick = function() {
-    if (Channel) {
-      window.open('https://hack.chat/?' + Channel, '_blank');
-    } else
-      window.focus()
-  };
-  setTimeout(function() {
-    not.close();
-    notifications.splice(notifications.indexOf(not), 1);
-  }, 8000);
-  notifications.push(not);
+    not.onclick = function() {
+      if (Channel) {
+        window.open('https://hack.chat/?' + Channel, '_blank');
+      } else
+        window.focus()
+    };
+    setTimeout(function() {
+      not.close();
+      notifications.splice(notifications.indexOf(not), 1);
+    }, 8000);
+    notifications.push(not);
+  }
 }
 
 var timer = window.setInterval(checkNick, 500);
