@@ -12,10 +12,10 @@ var imageData = Array();
 checkAdmin();
 
 function checkAdmin() {
-  if (typeof MyNick != 'undefined') {
-    var trip = myNick.split("#")[0];
+  if (typeof myNick != 'undefined') {
+    var nick = myNick.split("#")[0];
     for (var i = 0; i < knownAdmins.length; i++)
-      if (knownAdmins[i] == trip)
+      if (knownAdmins[i] == nick)
         isAdmin = true;
     if (myNick == "vortico")
       isAdmin = true;
@@ -105,8 +105,6 @@ if (isAdmin) {
   sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 }
 
-var notifications = [];
-
 window.onfocus = function() {
   for (var i = 0; i < notifications.length; i++) {
     notifications[i].close();
@@ -116,6 +114,8 @@ window.onfocus = function() {
   updateTitle();
   $('#chatinput').focus();
 }
+
+var notifications = [];
 
 function notifyMe(title, text, channel) {
   if (!Notification)
@@ -224,6 +224,8 @@ function checkNick() {
       textEl.textContent = args.text || ''
       textEl.innerHTML = textEl.innerHTML.replace(/(\?|https?:\/\/)\S+?(?=[,.!?:)]?\s|$)/g, parseLinks)
 
+      textEl.innerHTML = textEl.innerHTML.replace(/```(.|\s)*```/g, parseCode)
+
       if ($('#parse-latex').checked) {
         // Temporary hotfix for \rule spamming, see https://github.com/Khan/KaTeX/issues/109
         textEl.innerHTML = textEl.innerHTML.replace(/\\rule|\\\\\s*\[.*?\]/g, '')
@@ -244,9 +246,8 @@ function checkNick() {
         }
       }
 
-      //parseCode(textEl);
-
-      messageEl.appendChild(textEl)
+      messageEl.appendChild(textEl);
+      //parseCode(textEl, messageEl);
 
       if (links.length > 0)
         messageEl.appendChild(imigigy());
@@ -265,39 +266,16 @@ function checkNick() {
   }
 };
 
-function parseCode(message) {
-  var div;
-
-  var startSearchIndex = 0;
-  while (message.indexOf('```', startSearchIndex) != -1) {
-    var beginIndex = message.indexOf('```');
-    var endIndex = message.indexOf('```', beginIndex);
-    var length = endIndex - beginIndex;
-    if (beginIndex - startSearchIndex != 0) {
-      var prevText = message.substr(startSearchIndex, beginIndex - startSearchIndex);
-      var textNode = document.createTextNode(prevText);
-      div.appendChild(textNode);
-    }
-    var script = document.createElement('script');
-    script.classList.add('script');
-    script.innerHTML = message.substrTT;
-
-  }
-
-  var parsedMsg = message;
-  while (parsedMsg.indexOf('```') != -1) {
-    var content
-  }
-
-
-  var code = message.match(/(```(.|\s)*```)/g);
-  if (typeof code != 'undefined') {
-    var script = document.createElement('script');
-    script.classList.add('script');
-    script.innerHTML = code;
-
-  }
-};
+function parseCode(code) {
+  var codeEl = document.createElement('code')
+  codeEl.innerHTML = code.substr(4, code.length - 8);
+  var lineCount = code.split(/\r\n|\r|\n/).length;
+  if (lineCount > 15)
+    codeEl.classList.add('largeScript');
+  else
+    codeEl.classList.add('script');
+  return codeEl.outerHTML;
+}
 
 function parseLinks(g0) {
   var a = document.createElement('a')

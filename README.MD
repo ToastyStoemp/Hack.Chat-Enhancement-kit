@@ -1,4 +1,4 @@
-$\color{orange}{\large{Hack.Chat \space extension}} \space \color{lightblue}{0.0.5}$
+$\color{orange}{\large{Hack.Chat \space extension}} \space \color{lightblue}{0.0.7}$
 $made \space by \space \color{cyan}{ToastyStoemp}$
 
 $\color{OrangeRed}{Chrome \space FireFox \space Opera}$
