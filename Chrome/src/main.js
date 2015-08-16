@@ -3,6 +3,7 @@ var knownAdmins = ["ToastyStoemp", "M4GNV5", "Shrooms", "vortico", "bacon"];
 
 var messageSound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/messageSound.wav');
 var notifySound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/notificationSound.wav');
+var friendSound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/friendSound.wav');
 var modSound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/modSound.wav');
 var canCallMod = true;
 
@@ -25,7 +26,7 @@ var notifyMe_S = (localStorageGet('notifyMe_S') == "true");
 var sound_S = (localStorageGet('sound_S') == "true");
 var alarmMe_S = (localStorageGet('alarmMe_S') == "true");
 
-window.onbeforeunload = function(){
+window.onbeforeunload = function() {
   var notifyMe_S = localStorageSet('notifyMe_S', NotCheckbox.checked);
   var sound_S = localStorageSet('sound_S', SoundCheckbox.checked);
   var alarmMe_S = localStorageSet('alarmMe_S', AlarmCheckbox.checked);
@@ -63,20 +64,6 @@ if (isAdmin) {
   sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 }
 
-para = document.createElement("p");
-var btn = document.createElement("BUTTON");
-btn.appendChild(document.createTextNode("Ignore User"));
-btn.onclick = function() {
-  var tempUser = prompt("Enter nick:");
-  userIgnore(tempUser);
-  pushMessage({
-    nick: '*',
-    text: "User " + tempUser + " has been added to your ignore list."
-  });
-};
-para.appendChild(btn);
-sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
-
 if (isAdmin) {
   para = document.createElement("p");
   btn = document.createElement("BUTTON");
@@ -107,6 +94,87 @@ if (isAdmin) {
   para.appendChild(btn);
   sidebar.appendChild(para);
   sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
+}
+
+var friends = [];
+
+function userAdd(nick) {
+  if (friends.indexOf(nick) != -1)
+    if (SoundCheckbox.checked)
+      friendSound.play();
+  var user = document.createElement('p')
+  user.textContent = nick + ' ▾';
+  user.classList.add('listTitle');
+  var menu = document.createElement('ul');
+  var friendUser = document.createElement('a');
+  if (friends.indexOf(nick) == -1)
+    friendUser.textContent = "Add Friend";
+  else
+    friendUser.textContent = "Remove Friend";
+  friendUser.onclick = function(e) {
+    if (friendUser.textContent == "Add Friend") {
+      friendUser.textContent = "Remove Friend";
+      friends.push(nick);
+      pushMessage({
+        nick: '*',
+        text: "User " + nick + " has been added to your friends list."
+      });
+    } else {
+      friendUser.textContent = "Add Friend";
+      friends.splice(friends.indexOf(nick), 1);
+      pushMessage({
+        nick: '*',
+        text: "User " + nick + " has been removed to your friends list."
+      });
+    }
+  }
+  menuLi = document.createElement('li');
+  menuLi.appendChild(friendUser);
+  menu.appendChild(menuLi);
+
+  var inviteUser = document.createElement('a');
+  inviteUser.textContent = "Invite";
+  inviteUser.onclick = function(e) {
+    userInvite(nick);
+  };
+  menuLi = document.createElement('li')
+  menuLi.appendChild(inviteUser)
+  menu.appendChild(menuLi);
+
+  var ignoreUser = document.createElement('a');
+  ignoreUser.textContent = "Ignore";
+  ignoreUser.onclick = function(e) {
+    userIgnore(nick);
+    pushMessage({
+      nick: '*',
+      text: "User " + nick + " has been added to your ignore list."
+    });
+  }
+  var menuLi = document.createElement('li')
+  menuLi.appendChild(ignoreUser)
+  menu.appendChild(menuLi);
+
+  menu.classList.add('dropdown');
+  user.appendChild(menu);
+  var userLi = document.createElement('li')
+  userLi.appendChild(user)
+  $('#users').appendChild(userLi)
+  onlineUsers.push(nick);
+}
+
+function userRemove(nick) {
+  var users = $('#users')
+  var children = users.children
+  for (var i = 0; i < children.length; i++) {
+    var user = children[i]
+    if (user.textContent.substr(0, user.textContent.indexOf(' ')) == nick) {
+      users.removeChild(user)
+    }
+  }
+  var index = onlineUsers.indexOf(nick)
+  if (index >= 0) {
+    onlineUsers.splice(index, 1)
+  }
 }
 
 window.onfocus = function() {
