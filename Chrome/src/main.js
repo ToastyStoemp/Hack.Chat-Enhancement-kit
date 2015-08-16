@@ -25,11 +25,18 @@ function checkAdmin() {
 var notifyMe_S = (localStorageGet('notifyMe_S') == "true");
 var sound_S = (localStorageGet('sound_S') == "true");
 var alarmMe_S = (localStorageGet('alarmMe_S') == "true");
+var friends = localStorageGet('friends_S');
+if (friends == "")
+  friends = [];
+else
+  friends = friends.split(' ');
 
 window.onbeforeunload = function() {
   var notifyMe_S = localStorageSet('notifyMe_S', NotCheckbox.checked);
   var sound_S = localStorageSet('sound_S', SoundCheckbox.checked);
-  var alarmMe_S = localStorageSet('alarmMe_S', AlarmCheckbox.checked);
+  if (AlarmCheckbox)
+    var alarmMe_S = localStorageSet('alarmMe_S', AlarmCheckbox.checked);
+  var friends_S = localStorageSet('friends_S', friends.join(' '));
 }
 
 var sidebar = document.getElementById("sidebar-content");
@@ -53,9 +60,10 @@ para.appendChild(SoundCheckbox);
 para.appendChild(text);
 sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 
+var AlarmCheckbox;
 if (isAdmin) {
   para = document.createElement("p");
-  var AlarmCheckbox = document.createElement("INPUT");
+  AlarmCheckbox = document.createElement("INPUT");
   AlarmCheckbox.type = "checkbox";
   AlarmCheckbox.checked = alarmMe_S;
   text = document.createTextNode("Alarm me");
@@ -96,66 +104,71 @@ if (isAdmin) {
   sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 }
 
-var friends = [];
-
 function userAdd(nick) {
   if (friends.indexOf(nick) != -1)
     if (SoundCheckbox.checked)
       friendSound.play();
-  var user = document.createElement('p')
-  user.textContent = nick + ' ▾';
-  user.classList.add('listTitle');
-  var menu = document.createElement('ul');
-  var friendUser = document.createElement('a');
-  if (friends.indexOf(nick) == -1)
-    friendUser.textContent = "Add Friend";
-  else
-    friendUser.textContent = "Remove Friend";
-  friendUser.onclick = function(e) {
-    if (friendUser.textContent == "Add Friend") {
-      friendUser.textContent = "Remove Friend";
-      friends.push(nick);
-      pushMessage({
-        nick: '*',
-        text: "User " + nick + " has been added to your friends list."
-      });
-    } else {
+  var user = document.createElement('a')
+  if (nick != myNick.split('#')[0]) {
+    user.textContent = nick + ' ▾';
+    var menu = document.createElement('ul');    
+    var friendUser = document.createElement('a');
+    if (friends.indexOf(nick) == -1)
       friendUser.textContent = "Add Friend";
-      friends.splice(friends.indexOf(nick), 1);
+    else
+      friendUser.textContent = "Remove Friend";
+    friendUser.onclick = function(e) {
+      if (friendUser.textContent == "Add Friend") {
+        friendUser.textContent = "Remove Friend";
+        friends.push(nick);
+        pushMessage({
+          nick: '*',
+          text: "User " + nick + " has been added to your friends list."
+        });
+      } else {
+        friendUser.textContent = "Add Friend";
+        friends.splice(friends.indexOf(nick), 1);
+        pushMessage({
+          nick: '*',
+          text: "User " + nick + " has been removed to your friends list."
+        });
+      }
+    }
+    var menuLi = document.createElement('li');
+    menuLi.appendChild(friendUser);
+    menuLi.classList.add('menuList');
+    menu.appendChild(menuLi);
+
+    var inviteUser = document.createElement('a');
+    inviteUser.textContent = "Invite";
+    inviteUser.onclick = function(e) {
+      userInvite(nick);
+    };
+    menuLi = document.createElement('li')
+    menuLi.appendChild(inviteUser)
+    menuLi.classList.add('menuList');
+    menu.appendChild(menuLi);
+
+    var ignoreUser = document.createElement('a');
+    ignoreUser.textContent = "Ignore";
+    ignoreUser.onclick = function(e) {
+      userIgnore(nick);
       pushMessage({
         nick: '*',
-        text: "User " + nick + " has been removed to your friends list."
+        text: "User " + nick + " has been added to your ignore list."
       });
     }
+    menuLi = document.createElement('li')
+    menuLi.appendChild(ignoreUser)
+    menuLi.classList.add('menuList');
+    menu.appendChild(menuLi);
+
+    menu.classList.add('dropdown');
+    user.appendChild(menu);
   }
-  menuLi = document.createElement('li');
-  menuLi.appendChild(friendUser);
-  menu.appendChild(menuLi);
-
-  var inviteUser = document.createElement('a');
-  inviteUser.textContent = "Invite";
-  inviteUser.onclick = function(e) {
-    userInvite(nick);
-  };
-  menuLi = document.createElement('li')
-  menuLi.appendChild(inviteUser)
-  menu.appendChild(menuLi);
-
-  var ignoreUser = document.createElement('a');
-  ignoreUser.textContent = "Ignore";
-  ignoreUser.onclick = function(e) {
-    userIgnore(nick);
-    pushMessage({
-      nick: '*',
-      text: "User " + nick + " has been added to your ignore list."
-    });
-  }
-  var menuLi = document.createElement('li')
-  menuLi.appendChild(ignoreUser)
-  menu.appendChild(menuLi);
-
-  menu.classList.add('dropdown');
-  user.appendChild(menu);
+  else
+    user.textContent = nick;
+  user.classList.add('userList');
   var userLi = document.createElement('li')
   userLi.appendChild(user)
   $('#users').appendChild(userLi)
