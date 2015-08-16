@@ -3,6 +3,7 @@ var knownAdmins = ["ToastyStoemp", "M4GNV5", "Shrooms", "vortico", "bacon"];
 
 var messageSound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/messageSound.wav');
 var notifySound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/notificationSound.wav');
+var friendSound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/friendSound.wav');
 var modSound = new Audio('https://dl.dropboxusercontent.com/u/54596938/Hack.Chat%20Enhancement%20kit/modSound.wav');
 var canCallMod = true;
 
@@ -22,55 +23,66 @@ function checkAdmin() {
   }
 }
 
+var messageStyle_S = (localStorageGet('messageStyle_S') == "true");
+var notifyMe_S = (localStorageGet('notifyMe_S') == "true");
+var sound_S = (localStorageGet('sound_S') == "true");
+var alarmMe_S = (localStorageGet('alarmMe_S') == "true");
+var friends = localStorageGet('friends_S');
+if (friends == "" || typeof friends == 'undefined')
+  friends = [];
+else
+  friends = friends.split(' ');
+
+window.onbeforeunload = function() {
+  localStorageSet('messageStyle_S', messageCheckBox.checked)
+  localStorageSet('notifyMe_S', NotCheckbox.checked);
+  localStorageSet('sound_S', SoundCheckbox.checked);
+  if (AlarmCheckbox)
+    localStorageSet('alarmMe_S', AlarmCheckbox.checked);
+  localStorageSet('friends_S', friends.join(' '));
+}
+
 var sidebar = document.getElementById("sidebar-content");
 var contentCounter = 4;
 
 var para = document.createElement("p");
+var messageCheckBox = document.createElement("INPUT");
+messageCheckBox.type = "checkbox";
+messageCheckBox.checked = messageStyle_S;
+var text = document.createTextNode("Message Styling");
+para.appendChild(messageCheckBox);
+para.appendChild(text);
+sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
+
+para = document.createElement("p");
 var NotCheckbox = document.createElement("INPUT");
 NotCheckbox.type = "checkbox";
-NotCheckbox.checked = true;
+NotCheckbox.checked = notifyMe_S;
 var text = document.createTextNode("Notify me");
 para.appendChild(NotCheckbox);
 para.appendChild(text);
-sidebar.appendChild(para);
 sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 
 para = document.createElement("p");
 var SoundCheckbox = document.createElement("INPUT");
 SoundCheckbox.type = "checkbox";
-SoundCheckbox.checked = true;
+SoundCheckbox.checked = sound_S;
 text = document.createTextNode("Sound");
 para.appendChild(SoundCheckbox);
 para.appendChild(text);
-sidebar.appendChild(para);
 sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 
+var AlarmCheckbox;
 if (isAdmin) {
   para = document.createElement("p");
-  var AlarmCheckbox = document.createElement("INPUT");
+  AlarmCheckbox = document.createElement("INPUT");
   AlarmCheckbox.type = "checkbox";
-  AlarmCheckbox.checked = true;
+  AlarmCheckbox.checked = alarmMe_S;
   text = document.createTextNode("Alarm me");
   para.appendChild(AlarmCheckbox);
   para.appendChild(text);
-  sidebar.appendChild(para);
   sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 }
-
-para = document.createElement("p");
-var btn = document.createElement("BUTTON");
-btn.appendChild(document.createTextNode("Ignore User"));
-btn.onclick = function() {
-  var tempUser = prompt("Enter nick:");
-  userIgnore(tempUser);
-  pushMessage({
-    nick: '*',
-    text: "User " + tempUser + " has been added to your ignore list."
-  });
-};
-para.appendChild(btn);
-sidebar.appendChild(para);
-sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 
 if (isAdmin) {
   para = document.createElement("p");
@@ -83,7 +95,6 @@ if (isAdmin) {
     })
   };
   para.appendChild(btn);
-  sidebar.appendChild(para);
   sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 } else {
   para = document.createElement("p");
@@ -103,6 +114,92 @@ if (isAdmin) {
   para.appendChild(btn);
   sidebar.appendChild(para);
   sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
+}
+
+function userAdd(nick) {
+  if (friends.indexOf(nick) != -1)
+    if (SoundCheckbox.checked)
+      friendSound.play();
+  var user = document.createElement('a')
+  if (nick != myNick.split('#')[0]) {
+    user.textContent = nick + ' ▾';
+    var menu = document.createElement('ul');
+    var friendUser = document.createElement('a');
+    if (friends.indexOf(nick) == -1)
+      friendUser.textContent = "Add Friend";
+    else
+      friendUser.textContent = "Remove Friend";
+    friendUser.onclick = function(e) {
+      if (friendUser.textContent == "Add Friend") {
+        friendUser.textContent = "Remove Friend";
+        friends.push(nick);
+        pushMessage({
+          nick: '*',
+          text: "User " + nick + " has been added to your friends list."
+        });
+      } else {
+        friendUser.textContent = "Add Friend";
+        friends.splice(friends.indexOf(nick), 1);
+        pushMessage({
+          nick: '*',
+          text: "User " + nick + " has been removed to your friends list."
+        });
+      }
+    }
+    var menuLi = document.createElement('li');
+    menuLi.appendChild(friendUser);
+    menuLi.classList.add('menuList');
+    menu.appendChild(menuLi);
+
+    var inviteUser = document.createElement('a');
+    inviteUser.textContent = "Invite";
+    inviteUser.onclick = function(e) {
+      userInvite(nick);
+    };
+    menuLi = document.createElement('li')
+    menuLi.appendChild(inviteUser)
+    menuLi.classList.add('menuList');
+    menu.appendChild(menuLi);
+
+    var ignoreUser = document.createElement('a');
+    ignoreUser.textContent = "Ignore";
+    ignoreUser.onclick = function(e) {
+      userIgnore(nick);
+      pushMessage({
+        nick: '*',
+        text: "User " + nick + " has been added to your ignore list."
+      });
+    }
+    menuLi = document.createElement('li')
+    menuLi.appendChild(ignoreUser)
+    menuLi.classList.add('menuList');
+    menu.appendChild(menuLi);
+
+    menu.classList.add('dropdown');
+    user.appendChild(menu);
+  }
+  else
+    user.textContent = nick;
+  user.classList.add('userList');
+  var userLi = document.createElement('li')
+  userLi.appendChild(user)
+  $('#users').appendChild(userLi)
+  onlineUsers.push(nick);
+}
+
+function userRemove(nick) {
+  var users = $('#users')
+  var children = users.children
+  for (var i = 0; i < children.length; i++) {
+    var user = children[i]
+    if (user.textContent.substr(0, user.textContent.indexOf(' ')) == nick) {
+      users.removeChild(user)
+    }
+  }
+  var index = onlineUsers.indexOf(nick)
+  if (index >= 0) {
+    onlineUsers.splice(index, 1)
+  }
 }
 
 window.onfocus = function() {
@@ -151,11 +248,13 @@ function _notifiyMe(title, text, channel) {
 }
 
 var timer = window.setInterval(checkNick, 500);
-
+var lastMessageSender= "";
+var dark = false;
 function checkNick() {
   if (myNick) {
     window.clearInterval(timer);
     notifyMe();
+
     pushMessage = function(args) {
       // Message container
       var messageEl = document.createElement('div')
@@ -193,27 +292,31 @@ function checkNick() {
       }
 
       // Nickname
-      var nickSpanEl = document.createElement('span')
-      nickSpanEl.classList.add('nick')
-      messageEl.appendChild(nickSpanEl)
+      if (lastMessageSender != args.nick) {
+        dark = !dark;
 
-      if (args.trip) {
-        var tripEl = document.createElement('span')
-        tripEl.textContent = args.trip + " "
-        tripEl.classList.add('trip')
-        nickSpanEl.appendChild(tripEl)
-      }
+        var nickSpanEl = document.createElement('span')
+        nickSpanEl.classList.add('nick')
+        messageEl.appendChild(nickSpanEl)
 
-      if (args.nick) {
-        var nickLinkEl = document.createElement('a')
-        nickLinkEl.textContent = args.nick
-        nickLinkEl.onclick = function() {
-          insertAtCursor("@" + args.nick + " ")
-          $('#chatinput').focus()
+        if (args.trip) {
+          var tripEl = document.createElement('span')
+          tripEl.textContent = args.trip + " "
+          tripEl.classList.add('trip')
+          nickSpanEl.appendChild(tripEl)
         }
-        var date = new Date(args.time || Date.now())
-        nickLinkEl.title = date.toLocaleString()
-        nickSpanEl.appendChild(nickLinkEl)
+
+        if (args.nick) {
+          var nickLinkEl = document.createElement('a')
+          nickLinkEl.textContent = args.nick
+          nickLinkEl.onclick = function() {
+            insertAtCursor("@" + args.nick + " ")
+            $('#chatinput').focus()
+          }
+          var date = new Date(args.time || Date.now())
+          nickLinkEl.title = date.toLocaleString()
+          nickSpanEl.appendChild(nickLinkEl)
+        }
       }
 
       // Text
@@ -254,6 +357,8 @@ function checkNick() {
 
       // Scroll to bottom
       var atBottom = isAtBottom()
+      if (dark && messageCheckBox.checked)
+        messageEl.classList.add('dark');
       $('#messages').appendChild(messageEl)
       if (atBottom) {
         window.scrollTo(0, document.body.scrollHeight)
@@ -262,6 +367,8 @@ function checkNick() {
       if (!document.hasFocus() && args.nick != '*')
         unread += 1
       updateTitle()
+
+      lastMessageSender = args.nick;
     }
   }
 };

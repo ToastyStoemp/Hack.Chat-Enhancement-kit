@@ -55,3 +55,6 @@ Added:
   code
   ```
 - Local storage is now used to save your options
+- Menu for users in the sidebar
+- Friends, notification when they join the lobby (more to come)
+- Message merging, and styling with option

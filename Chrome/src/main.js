@@ -22,12 +22,13 @@ function checkAdmin() {
       isAdmin = true;
   }
 }
+
 var messageStyle_S = (localStorageGet('messageStyle_S') == "true");
 var notifyMe_S = (localStorageGet('notifyMe_S') == "true");
 var sound_S = (localStorageGet('sound_S') == "true");
 var alarmMe_S = (localStorageGet('alarmMe_S') == "true");
 var friends = localStorageGet('friends_S');
-if (friends == "")
+if (friends == "" || typeof friends == 'undefined')
   friends = [];
 else
   friends = friends.split(' ');

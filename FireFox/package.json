@@ -5,9 +5,5 @@
   "description": "Adds various functions to Hack.Chat - made by ToastyStoemp",
   "main": "index.js",
   "author": "ToastyStoemp",
-  "engines": {
-    "firefox": ">=38.0a1",
-    "fennec": ">=38.0a1"
-  },
   "license": "MIT"
 }
