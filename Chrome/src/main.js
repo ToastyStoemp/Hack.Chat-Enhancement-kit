@@ -22,6 +22,7 @@ function checkAdmin() {
       isAdmin = true;
   }
 }
+var messageStyle_S = (localStorageGet('messageStyle_S') == "true");
 var notifyMe_S = (localStorageGet('notifyMe_S') == "true");
 var sound_S = (localStorageGet('sound_S') == "true");
 var alarmMe_S = (localStorageGet('alarmMe_S') == "true");
@@ -32,17 +33,27 @@ else
   friends = friends.split(' ');
 
 window.onbeforeunload = function() {
-  var notifyMe_S = localStorageSet('notifyMe_S', NotCheckbox.checked);
-  var sound_S = localStorageSet('sound_S', SoundCheckbox.checked);
+  localStorageSet('messageStyle_S', messageCheckBox.checked)
+  localStorageSet('notifyMe_S', NotCheckbox.checked);
+  localStorageSet('sound_S', SoundCheckbox.checked);
   if (AlarmCheckbox)
-    var alarmMe_S = localStorageSet('alarmMe_S', AlarmCheckbox.checked);
-  var friends_S = localStorageSet('friends_S', friends.join(' '));
+    localStorageSet('alarmMe_S', AlarmCheckbox.checked);
+  localStorageSet('friends_S', friends.join(' '));
 }
 
 var sidebar = document.getElementById("sidebar-content");
 var contentCounter = 4;
 
 var para = document.createElement("p");
+var messageCheckBox = document.createElement("INPUT");
+messageCheckBox.type = "checkbox";
+messageCheckBox.checked = messageStyle_S;
+var text = document.createTextNode("Message Styling");
+para.appendChild(messageCheckBox);
+para.appendChild(text);
+sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
+
+para = document.createElement("p");
 var NotCheckbox = document.createElement("INPUT");
 NotCheckbox.type = "checkbox";
 NotCheckbox.checked = notifyMe_S;
@@ -111,7 +122,7 @@ function userAdd(nick) {
   var user = document.createElement('a')
   if (nick != myNick.split('#')[0]) {
     user.textContent = nick + ' ▾';
-    var menu = document.createElement('ul');    
+    var menu = document.createElement('ul');
     var friendUser = document.createElement('a');
     if (friends.indexOf(nick) == -1)
       friendUser.textContent = "Add Friend";
@@ -236,11 +247,13 @@ function _notifiyMe(title, text, channel) {
 }
 
 var timer = window.setInterval(checkNick, 500);
-
+var lastMessageSender= "";
+var dark = false;
 function checkNick() {
   if (myNick) {
     window.clearInterval(timer);
     notifyMe();
+
     pushMessage = function(args) {
       // Message container
       var messageEl = document.createElement('div')
@@ -278,27 +291,31 @@ function checkNick() {
       }
 
       // Nickname
-      var nickSpanEl = document.createElement('span')
-      nickSpanEl.classList.add('nick')
-      messageEl.appendChild(nickSpanEl)
+      if (lastMessageSender != args.nick) {
+        dark = !dark;
 
-      if (args.trip) {
-        var tripEl = document.createElement('span')
-        tripEl.textContent = args.trip + " "
-        tripEl.classList.add('trip')
-        nickSpanEl.appendChild(tripEl)
-      }
+        var nickSpanEl = document.createElement('span')
+        nickSpanEl.classList.add('nick')
+        messageEl.appendChild(nickSpanEl)
 
-      if (args.nick) {
-        var nickLinkEl = document.createElement('a')
-        nickLinkEl.textContent = args.nick
-        nickLinkEl.onclick = function() {
-          insertAtCursor("@" + args.nick + " ")
-          $('#chatinput').focus()
+        if (args.trip) {
+          var tripEl = document.createElement('span')
+          tripEl.textContent = args.trip + " "
+          tripEl.classList.add('trip')
+          nickSpanEl.appendChild(tripEl)
         }
-        var date = new Date(args.time || Date.now())
-        nickLinkEl.title = date.toLocaleString()
-        nickSpanEl.appendChild(nickLinkEl)
+
+        if (args.nick) {
+          var nickLinkEl = document.createElement('a')
+          nickLinkEl.textContent = args.nick
+          nickLinkEl.onclick = function() {
+            insertAtCursor("@" + args.nick + " ")
+            $('#chatinput').focus()
+          }
+          var date = new Date(args.time || Date.now())
+          nickLinkEl.title = date.toLocaleString()
+          nickSpanEl.appendChild(nickLinkEl)
+        }
       }
 
       // Text
@@ -339,6 +356,8 @@ function checkNick() {
 
       // Scroll to bottom
       var atBottom = isAtBottom()
+      if (dark && messageCheckBox.checked)
+        messageEl.classList.add('dark');
       $('#messages').appendChild(messageEl)
       if (atBottom) {
         window.scrollTo(0, document.body.scrollHeight)
@@ -347,6 +366,8 @@ function checkNick() {
       if (!document.hasFocus() && args.nick != '*')
         unread += 1
       updateTitle()
+
+      lastMessageSender = args.nick;
     }
   }
 };

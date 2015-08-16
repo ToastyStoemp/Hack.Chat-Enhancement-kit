@@ -62,3 +62,7 @@ ul li ul li a:hover {
 .userList {
   text-decoration: none;
 }
+
+.dark {
+  background-color: rgba(129, 129, 129, 0.11);
+}
