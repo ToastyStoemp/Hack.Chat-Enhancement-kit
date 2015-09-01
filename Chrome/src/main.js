@@ -18,14 +18,13 @@ function checkAdmin() {
     for (var i = 0; i < knownAdmins.length; i++)
       if (knownAdmins[i] == nick)
         isAdmin = true;
-    if (myNick == "vortico")
-      isAdmin = true;
   }
 }
 
 var messageStyle_S = (localStorageGet('messageStyle_S') == "true");
 var notifyMe_S = (localStorageGet('notifyMe_S') == "true");
 var sound_S = (localStorageGet('sound_S') == "true");
+var preLoad_S = (localStorageGet('preLoad_S') == "true");
 var alarmMe_S = (localStorageGet('alarmMe_S') == "true");
 var friends = localStorageGet('friends_S');
 if (friends == "" || typeof friends == 'undefined')
@@ -69,6 +68,15 @@ SoundCheckbox.type = "checkbox";
 SoundCheckbox.checked = sound_S;
 text = document.createTextNode("Sound");
 para.appendChild(SoundCheckbox);
+para.appendChild(text);
+sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
+
+para = document.createElement("p");
+var PreLoadCheckBox = document.createElement("INPUT");
+PreLoadCheckBox.type = "checkbox";
+PreLoadCheckBox.checked = sound_S;
+text = document.createTextNode("Preload Content");
+para.appendChild(PreLoadCheckBox);
 para.appendChild(text);
 sidebar.insertBefore(para, sidebar.childNodes[contentCounter++]);
 
@@ -411,9 +419,18 @@ function imigigy() {
         el.innerHTML = '[+]';
         el.style.border = 'none';
         el.style.background = 'none';
-        el.onclick = function() {
-          showImages();
-        };
+        if (PreLoadCheckBox.checked) {
+          createContent(images, videos, YoutubeVids);
+          el.onclick = function() {
+            showImages();
+          };
+        }
+        else {
+          el.onclick = function() {
+            createContent(images, videos, YoutubeVids);
+            showImages();
+          };
+        }
         el.addEventListener("mouseover", function() {
           el.style.cursor = "pointer";
         });
@@ -421,15 +438,7 @@ function imigigy() {
         break;
       }
     }
-
-    for (var i = 0; i < links.length; i++) {
-      if (imageTypes.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1)
-        p.appendChild(createImageElement(links[i], images));
-      else if (videoTypes.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1)
-        p.appendChild(createvideoElement(links[i], videos));
-      else if (typeof parse_yturl(links[i]) != 'undefined')
-        p.appendChild(createYouTubeElement(parse_yturl(links[i]), YoutubeVids));
-    }
+  }
 
     function showImages() {
       for (var i = 0; i < images.length; i++) {
@@ -480,6 +489,16 @@ function parse_yturl(url) {
     return video_id;
   }
   return
+}
+
+function createContent(images, videos, YoutubeVids){
+  for (var i = 0; i < links.length; i++) {
+    if (imageTypes.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1)
+      p.appendChild(createImageElement(links[i], images));
+    else if (videoTypes.indexOf(links[i].substr(links[i].lastIndexOf('.') + 1)) != -1)
+      p.appendChild(createvideoElement(links[i], videos));
+    else if (typeof parse_yturl(links[i]) != 'undefined')
+      p.appendChild(createYouTubeElement(parse_yturl(links[i]), YoutubeVids));
 }
 
 function createImageElement(link, images) {
