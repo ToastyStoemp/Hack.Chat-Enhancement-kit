@@ -112,7 +112,7 @@ if (isAdmin) {
     send({
       cmd: 'chat',
       nick: myNick,
-      text: '.callMod ' + prompt("Enter name of suspect") + ' ' + prompt("Enter reason")
+      text: '.callMod ' + prompt("WARNING, this function allerts a moderator, do not use this feature without a valid reason!\nEnter name of suspect") + ' ' + prompt("Enter reason")
     });
     btn.disabled = true;
     setTimeout(function() {
@@ -520,7 +520,6 @@ function createvideoElement(link, videos) {
   video.style.display = "none";
   video.style.width = "100%";
   video.style.height = "100%";
-  video.play();
   video.loop = true;
   videos.push(video);
   return video;
