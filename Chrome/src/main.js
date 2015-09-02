@@ -287,7 +287,7 @@ function checkNick() {
           notifyMe(args.nick + " mentioned you", args.text, false);
       }
       if (isAdmin) {
-        if (args.text.indexOf('.callMod') != -1) {
+        if (args.text.substr(0,8) == '.callMod') {
           if (canCallMod) {
             send({
               cmd: 'chat',
