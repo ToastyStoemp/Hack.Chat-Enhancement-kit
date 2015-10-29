@@ -1,12 +1,16 @@
-$\color{orange}{\large{Hack.Chat \space extension}} \space \color{lightblue}{0.0.8}$
-$made \space by \space \color{cyan}{ToastyStoemp}$
+# Hack.Chat extension 
+## Version: 0.0.8
+made by ToastyStoemp
+#### Installation
+For Chrome, Firefox or Opera, download here: https://github.com/ToastyStoemp/Hack.Chat-Enhancement-kit/releases
 
-$\color{OrangeRed}{Chrome \space FireFox \space Opera}$
-download here: https://github.com/ToastyStoemp/Hack.Chat-Enhancement-kit/releases
-just drag and drop in: chrome://extensions/ or anywhere in firefox
-GitHub: https://github.com/ToastyStoemp/Hack.Chat-Enhancement-kit
+Just drag and drop in: chrome://extensions/ or anywhere in firefox. 
+
+If that doesn't work on chrome, download the zip file of the source code, extract it and from chrome://extensions page, click "Load unpacked extension", navigate to the "chrome" subfolder from the extracted directory and select it.
+
 Instructions: http://bit.ly/1HH6eqy
-A big Thanks to $\color{SpringGreen}{raf924}$ for help on the firefox version!
+
+Big thanks to [raf924](https://github.com/raf924) for help on the firefox version!
 
 #v0.0.4
 Fixed:
